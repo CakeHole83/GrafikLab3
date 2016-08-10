@@ -289,74 +289,29 @@ namespace Assignment3
             var cubeMapE = new Entity();
             cubeMapE.Tag = "Cube";
            
-
+         
             var SMSphere = new ModelComponent
             {
                 Model = Content.Load<Model>("albin_sphere"),
             };
-
+   
             var SMEffectC = new EffectComponent
             {
                 Effects = new Dictionary<Effect, List<string>>(),
             };
-            SMEffectC.Effects.Add(Content.Load<Effect>("Effects/ShadowMapping"), new List<string> { "xWorldViewProjection", "xLightPos", "SkyboxTexture", "LightPower","Ambient", "xLightsWorldViewProjection" });
+            //SMEffectC.Effects.Add(Content.Load<Effect>("Effects/ShadowMapping"), new List<string> { "xWorldViewProjection", "xLightPos", "SkyboxTexture", "LightPower","Ambient", "xLightsWorldViewProjection" });
             var smModelTransC = new ModelTransformComponent(SMSphere.Model);
-
+        
             var SMTransformC = new TransformComponent()
             {
                 Position = new Vector3(-0, 200, 4500),
                 Rotation = new Vector3(0),
-                Scale = new Vector3(30)
+                Scale = new Vector3(1)
             };
             componentManager.AddComponent(cubeMapE, SMTransformC);
             componentManager.AddComponent(cubeMapE, SMSphere);
             componentManager.AddComponent(cubeMapE, smModelTransC);
             componentManager.AddComponent(cubeMapE, SMEffectC);
-
-
-
-            //OLD ENV MAPPING
-            //Cubemap
-            //var cubeMapE = new Entity();
-            //cubeMapE.Tag = "Cube";
-            //var cubeMapComponent = new CubemapComponent
-            //{
-            //    renderTargetCube = new RenderTargetCube(graphics.GraphicsDevice, 1024, false, graphics.GraphicsDevice.DisplayMode.Format, DepthFormat.Depth24),
-
-            //    renderTarget = new RenderTarget2D(
-            //    graphics.GraphicsDevice,
-            //    graphics.GraphicsDevice.PresentationParameters.BackBufferWidth,
-            //    graphics.GraphicsDevice.PresentationParameters.BackBufferHeight,
-            //    false,
-            //    graphics.GraphicsDevice.PresentationParameters.BackBufferFormat,
-            //    DepthFormat.Depth24)
-            //};
-
-            //var cubeMapModelComponent = new ModelComponent
-            //{
-            //    Model = Content.Load<Model>("albin_sphere"),
-            //};
-
-            //var cubeMapEffectComponent = new EffectComponent
-            //{
-            //    Effects = new Dictionary<Effect, List<string>>(),
-
-            //};
-            //cubeMapEffectComponent.Effects.Add(Content.Load<Effect>("Effects/envMapp"), new List<string> { "WorldInverseTranspose", "CameraPosition", "SkyboxTexture" });
-            //var cubeMapModelTransformComponent = new ModelTransformComponent(cubeMapModelComponent.Model);
-
-            //var cubeMapTransformComponent = new TransformComponent()
-            //{
-            //    Position = new Vector3(-0, 200, 4500),
-            //    Rotation = new Vector3(0),
-            //    Scale = new Vector3(30)
-            //};
-
-            //componentManager.AddComponent(cubeMapE, cubeMapComponent);
-            //componentManager.AddComponent(cubeMapE, cubeMapTransformComponent);
-            //componentManager.AddComponent(cubeMapE, cubeMapModelComponent);
-            //componentManager.AddComponent(cubeMapE, cubeMapModelTransformComponent);
-            //componentManager.AddComponent(cubeMapE, cubeMapEffectComponent);
         }
 
         public void InitializeSystems()
