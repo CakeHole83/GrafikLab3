@@ -24,7 +24,7 @@ namespace ECS_Engine.Engine.Component {
         public float AspectRatio { get; set; }
         public float NearPlaneDistace { get; set; }
         public float FarPlaneDistace { get; set; }
-
         public Vector3 ViewVector { get; set; }
+
     }
 }

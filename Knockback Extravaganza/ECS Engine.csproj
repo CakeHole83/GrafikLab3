@@ -56,6 +56,7 @@
     <Compile Include="Engine\Component\MouseComponent.cs" />
     <Compile Include="Engine\Component\PhysicsComponent.cs" />
     <Compile Include="Engine\Component\Shaders\EffectComponent.cs" />
+    <Compile Include="Engine\Component\Shaders\ShadowComponent.cs" />
     <Compile Include="Engine\Component\Shaders\SkyboxShaderComponent.cs" />
     <Compile Include="Engine\Component\VertexBufferComponent.cs" />
     <Compile Include="Engine\Component\VertexComponent.cs" />

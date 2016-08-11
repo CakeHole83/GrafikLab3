@@ -286,32 +286,13 @@ namespace Assignment3
             componentManager.AddComponent(skyboxE, skyboxC);
 
             //ShadowMapping cube
-            var cubeMapE = new Entity();
-            cubeMapE.Tag = "Cube";
+            var shadowMapEntity = new Entity();
+            shadowMapEntity.Tag = "shadowmap";
+
+            ShadowComponent shadow = new ShadowComponent();
+            componentManager.AddComponent(shadowMapEntity, shadow);
+
            
-         
-            var SMSphere = new ModelComponent
-            {
-                Model = Content.Load<Model>("albin_sphere"),
-            };
-   
-            var SMEffectC = new EffectComponent
-            {
-                Effects = new Dictionary<Effect, List<string>>(),
-            };
-            //SMEffectC.Effects.Add(Content.Load<Effect>("Effects/ShadowMapping"), new List<string> { "xWorldViewProjection", "xLightPos", "SkyboxTexture", "LightPower","Ambient", "xLightsWorldViewProjection" });
-            var smModelTransC = new ModelTransformComponent(SMSphere.Model);
-        
-            var SMTransformC = new TransformComponent()
-            {
-                Position = new Vector3(-0, 200, 4500),
-                Rotation = new Vector3(0),
-                Scale = new Vector3(1)
-            };
-            componentManager.AddComponent(cubeMapE, SMTransformC);
-            componentManager.AddComponent(cubeMapE, SMSphere);
-            componentManager.AddComponent(cubeMapE, smModelTransC);
-            componentManager.AddComponent(cubeMapE, SMEffectC);
         }
 
         public void InitializeSystems()

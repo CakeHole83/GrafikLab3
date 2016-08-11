@@ -15,15 +15,13 @@ namespace ECS_Engine.Engine.Systems
 {
     public class ModelRenderSystem : IRenderSystem
     {
+        public static SpriteBatch spriteBatch;
         SortedList<float, Entity> transparentEntities = new SortedList<float, Entity>();
         public void Render(GameTime gameTime, GraphicsDeviceManager graphicsDevice, ComponentManager componentManager)
         {
             Dictionary<Entity, IComponent> cameraValuePairs = componentManager.GetComponents<CameraComponent>();
             CameraComponent cameraC = (CameraComponent)cameraValuePairs.First().Value;
-//            CubemapComponent cubeMapC = (CubemapComponent)cubeMapKeyValuePairs.First().Value;
-//            Dictionary<Entity, IComponent> cubeMapKeyValuePairs = componentManager.GetComponents<CubemapComponent>();
-            //if (cubeMapC != null)
-            //    CreateCubeMap(cubeMapC, cameraC, componentManager, graphicsDevice);
+
             DrawSkybox(graphicsDevice.GraphicsDevice, componentManager);
 
             Dictionary<Entity, IComponent> cam = componentManager.GetComponents<CameraComponent>();
@@ -83,80 +81,6 @@ namespace ECS_Engine.Engine.Systems
             DrawModelsWithEffects(graphicsDevice, componentManager);
         }
 
-        //public void CreateCubeMap(CubemapComponent cubeMapComponent, CameraComponent cameraComponent, ComponentManager componentManager, GraphicsDeviceManager graphicsDevice)
-        //{
-        //    Dictionary<Entity, IComponent> cam = componentManager.GetComponents<CameraComponent>();
-        //    CameraComponent camera = (CameraComponent)cam.First().Value;
-        //    foreach (KeyValuePair<Entity, IComponent> camE in cam)
-        //    {
-        //        TransformComponent cameraTransC = componentManager.GetComponent<TransformComponent>(camE.Key);
-
-        //        Dictionary<Entity, IComponent> models = componentManager.GetComponents<CubemapComponent>();
-        //        foreach (KeyValuePair<Entity, IComponent> keyvaluepair in models)
-        //        {
-        //            TransformComponent transC = componentManager.GetComponent<TransformComponent>(keyvaluepair.Key);
-        //            Matrix originalViewMatrix = cameraComponent.View;
-        //            Matrix originalProjectionMatrix = cameraComponent.Projection;
-       
-        //            var proj = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90), 1, cameraComponent.NearPlaneDistace, cameraComponent.FarPlaneDistace);
-
-        //            cameraComponent.Projection = proj;
-        //            cubeMapComponent.RenderTextCube = false;
-                 
-
-        //            for (int i = 0; i < 6; i++)
-        //            {
-        //                CubeMapFace cubeMapFace = (CubeMapFace)i;
-        //                switch (cubeMapFace)
-        //                {
-        //                    case CubeMapFace.NegativeX:
-        //                        {
-        //                            cameraComponent.View = Matrix.CreateLookAt(transC.Position, Vector3.Left + transC.Position, Vector3.Up);
-        //                            break;
-        //                        }
-        //                    case CubeMapFace.PositiveY:
-        //                        {
-        //                            cameraComponent.View = Matrix.CreateLookAt(transC.Position, Vector3.Down + transC.Position, Vector3.Forward);
-        //                            break;
-        //                        }
-        //                    case CubeMapFace.NegativeZ:
-        //                        {
-        //                            cameraComponent.View = Matrix.CreateLookAt(transC.Position, Vector3.Backward + transC.Position, Vector3.Up);
-        //                            break;
-        //                        }
-        //                    case CubeMapFace.PositiveX:
-        //                        {
-        //                            cameraComponent.View = Matrix.CreateLookAt(transC.Position, Vector3.Right + transC.Position, Vector3.Up);
-        //                            break;
-        //                        }
-        //                    case CubeMapFace.NegativeY:
-        //                        {
-        //                            cameraComponent.View = Matrix.CreateLookAt(transC.Position, Vector3.Up + transC.Position, Vector3.Backward);
-        //                            break;
-        //                        }
-        //                    case CubeMapFace.PositiveZ:
-        //                        {
-        //                            cameraComponent.View = Matrix.CreateLookAt(transC.Position, Vector3.Forward + transC.Position, Vector3.Up);
-        //                            break;
-        //                        }
-        //                    default:
-        //                        break;
-        //                }
-
-        //                graphicsDevice.GraphicsDevice.SetRenderTarget(cubeMapComponent.renderTargetCube, cubeMapFace);
-
-        //                DrawModelsWithEffects(graphicsDevice, componentManager);
-        //                DrawSkybox(graphicsDevice.GraphicsDevice, componentManager);
-        //            }
-        //            graphicsDevice.GraphicsDevice.SetRenderTarget(null);
-        //            cubeMapComponent.environmentMap = cubeMapComponent.renderTargetCube;
-        //            cameraComponent.View = originalViewMatrix;
-        //            cameraComponent.Projection = originalProjectionMatrix;
-        //            cubeMapComponent.RenderTextCube = true;
-        //        }
-        //    }
-        //}
-
         public void DrawModelsWithEffects(GraphicsDeviceManager graphicsDevice, ComponentManager componentManager)
         {
             Dictionary<Entity, IComponent> cam = componentManager.GetComponents<CameraComponent>();
@@ -172,7 +96,6 @@ namespace ECS_Engine.Engine.Systems
                     ModelComponent model = componentManager.GetComponent<ModelComponent>(component.Key);
                     ModelTransformComponent meshTransform = componentManager.GetComponent<ModelTransformComponent>(component.Key);
                     TransformComponent transform = componentManager.GetComponent<TransformComponent>(component.Key);
-//                    CubemapComponent cubeMapComponent = componentManager.GetComponent<CubemapComponent>(component.Key);
                     if (model.HasTransparentMesh == true)
                         transparentEntities.Add(Vector3.Distance(cameraTransC.Position, transform.Position), component.Key);
 
@@ -236,55 +159,11 @@ namespace ECS_Engine.Engine.Systems
                             }
                         }
                     }
-                    if (effectC != null && model.HasTransparentMesh == false)
-                    {
-                        Matrix[] transforms = new Matrix[model.Model.Bones.Count];
-                        model.Model.CopyAbsoluteBoneTransformsTo(transforms);
-
-                        foreach (ModelMesh mesh in model.Model.Meshes)
-                        {
-                            foreach (ModelMeshPart part in mesh.MeshParts)
-                            {
-                                foreach (EffectPass pass in part.Effect.CurrentTechnique.Passes)
-                                {
-                                    foreach (var effect in effectC.Effects)
-                                    {
-                                        part.Effect = effect.Key;
-                                        part.Effect.Parameters["World"].SetValue(meshTransform.GetTranform(mesh.Name).World * transforms[mesh.ParentBone.Index] * transform.World);
-                                        part.Effect.Parameters["View"].SetValue(camera.View);
-                                        part.Effect.Parameters["Projection"].SetValue(camera.Projection);
-
-                                        foreach (var parameter in effect.Value)
-                                        {
-                                            switch (parameter)
-                                            {
-                                                case "WorldInverseTranspose":
-                                                    Matrix worldInverseTransposeMatrix =
-                                                    Matrix.Transpose(Matrix.Invert(mesh.ParentBone.Transform * meshTransform.GetTranform(mesh.Name).World));
-                                                    part.Effect.Parameters["WorldInverseTranspose"].SetValue(worldInverseTransposeMatrix);
-                                                    break;
-                                                //case "SkyboxTexture":
-                                                //    part.Effect.Parameters["SkyboxTexture"].SetValue(cubeMapComponent.environmentMap);
-                                                //    break;
-                                                case "CameraPosition":
-                                                    part.Effect.Parameters["CameraPosition"].SetValue(cameraTransC.Position);
-                                                    break;
-                                                default:
-                                                    break;
-                                            }
-                                        }
-
-                                    }
-                                    pass.Apply();
-                                }
-                                mesh.Draw();
-                            }
-                        }
-                    }
                 }
             }
             DrawTransparentModels(graphicsDevice, componentManager, transparentEntities);
             transparentEntities.Clear();
+            DrawShadowmapModels(graphicsDevice.GraphicsDevice, componentManager);
         }
 
         public void DrawTransparentModels(GraphicsDeviceManager graphicsDevice, ComponentManager componentManager, SortedList<float, Entity> transparentEntities)
@@ -423,6 +302,117 @@ namespace ECS_Engine.Engine.Systems
                 rs2.CullMode = CullMode.CullCounterClockwiseFace;
                 graphics.RasterizerState = rs2;
 
+            }
+        }
+
+        void DrawShadowmapModels(GraphicsDevice graphicsDevice, ComponentManager componentManager)
+        {
+            Dictionary<Entity, IComponent> camEntities = componentManager.GetComponents<CameraComponent>();
+            CameraComponent camera = (CameraComponent)camEntities.First().Value;
+
+            Dictionary<Entity, IComponent> shadowComponent = componentManager.GetComponents<ShadowComponent>();
+            ShadowComponent shadow = (ShadowComponent)shadowComponent.First().Value;
+
+            shadow.LightViewProjection = CreateLightViewProjectionMatrix(shadow, camera);
+
+            graphicsDevice.BlendState = BlendState.Opaque;
+            graphicsDevice.DepthStencilState = DepthStencilState.Default;
+
+            CreateShadowMap(componentManager, shadow, graphicsDevice);
+
+            spriteBatch.Begin(0, BlendState.Opaque, SamplerState.PointClamp, null, null);
+            spriteBatch.Draw(shadow.ShadowRenderTarget, new Rectangle(0, 0, 128, 128), Color.White);
+            spriteBatch.End();
+
+            graphicsDevice.Textures[0] = null;
+            graphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
+        }
+        public Matrix CreateLightViewProjectionMatrix(ShadowComponent shadow, CameraComponent camera)
+        {
+            shadow.LightRotation = Matrix.CreateLookAt(Vector3.Zero,
+                                                       -shadow.LightDirection,
+                                                       Vector3.Up);
+
+            BoundingFrustum camFrustrum = new BoundingFrustum(camera.Projection);
+            shadow.FrustumCorners = camFrustrum.GetCorners();
+
+            for (int i = 0; i < shadow.FrustumCorners.Length; i++)
+            {
+                shadow.FrustumCorners[i] = Vector3.Transform(shadow.FrustumCorners[i], shadow.LightRotation);
+            }
+
+            BoundingBox lightBox = BoundingBox.CreateFromPoints(shadow.FrustumCorners);
+
+            Vector3 boxSize = lightBox.Max - lightBox.Min;
+            Vector3 halfBoxSize = boxSize * 0.5f;
+
+            Vector3 lightPosition = lightBox.Min + halfBoxSize;
+            lightPosition.Z = lightBox.Min.Z;
+
+            lightPosition = Vector3.Transform(lightPosition,
+                                              Matrix.Invert(shadow.LightRotation));
+
+            Matrix lightView = Matrix.CreateLookAt(lightPosition,
+                                                   lightPosition - shadow.LightDirection,
+                                                   Vector3.Up);
+
+            Matrix lightProjection = Matrix.CreateOrthographic(boxSize.X, boxSize.Y,
+                                                               -boxSize.Z, boxSize.Z);
+
+            return lightView * lightProjection;
+        }
+
+        void CreateShadowMap(ComponentManager componentManager, ShadowComponent shadow, GraphicsDevice graphicsDevice)
+        {
+            Dictionary<Entity, IComponent> models = componentManager.GetComponents<ModelComponent>();
+            Dictionary<Entity, IComponent> cam = componentManager.GetComponents<CameraComponent>();
+            CameraComponent camera = (CameraComponent)cam.First().Value;
+
+            graphicsDevice.SetRenderTarget(shadow.ShadowRenderTarget);
+            graphicsDevice.Clear(Color.White);
+
+
+
+
+            foreach (ModelComponent model in models.Values)
+            {
+                if (model.CastShadow)
+                {
+                    DrawShadowModel(model,shadow,camera, true);
+                    graphicsDevice.SetRenderTarget(null);
+                }
+                graphicsDevice.Clear(Color.CornflowerBlue);
+                graphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
+                DrawShadowModel(model, shadow, camera, false);
+            }
+            
+        }
+
+        void DrawShadowModel(ModelComponent model, ShadowComponent shadow,  CameraComponent camera, bool createShadowMap)
+        {
+            string techniqueName = createShadowMap ? "CreateShadowMap" : "DrawWithShadowMap";
+
+            Matrix[] transforms = new Matrix[model.Model.Bones.Count];
+            model.Model.CopyAbsoluteBoneTransformsTo(transforms);
+
+            // Loop over meshs in the model
+            foreach (ModelMesh mesh in model.Model.Meshes)
+            {
+                // Loop over effects in the mesh
+                foreach (Effect effect in mesh.Effects)
+                {
+                    effect.CurrentTechnique = effect.Techniques[techniqueName];
+                    effect.Parameters["World"].SetValue(Matrix.Identity);
+                    effect.Parameters["View"].SetValue(camera.View);
+                    effect.Parameters["Projection"].SetValue(camera.Projection);
+                    effect.Parameters["LightDirection"].SetValue(shadow.LightDirection);
+                    effect.Parameters["LightViewProj"].SetValue(shadow.LightViewProjection);
+
+                    if (!createShadowMap)
+                        effect.Parameters["ShadowMap"].SetValue(shadow.ShadowRenderTarget);
+                }
+
+                mesh.Draw();
             }
         }
     }
