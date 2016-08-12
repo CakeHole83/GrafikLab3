@@ -77,7 +77,7 @@ namespace Assignment3
             componentManager.AddComponent(targetEntity, movementCompTarget);
             componentManager.AddComponent(targetEntity, keyboardCompTarget);
             componentManager.AddComponent(targetEntity, tranformCompTarget);
-
+            
             //Camera
 
             Entity cameraEntity = new Entity();
@@ -285,11 +285,22 @@ namespace Assignment3
 
             componentManager.AddComponent(skyboxE, skyboxC);
 
+            //ShadowMapping
+            RenderTarget2D shadowTarget = new RenderTarget2D(graphics.GraphicsDevice,
+                                                    2048,
+                                                    2048,
+                                                    false,
+                                                    SurfaceFormat.Single,
+                                                    DepthFormat.Depth24);
+
             //ShadowMapping cube
             var shadowMapEntity = new Entity();
             shadowMapEntity.Tag = "shadowmap";
 
             ShadowComponent shadow = new ShadowComponent();
+            shadow.ShadowEffect = Content.Load<Effect>("Effects/ShadowMapping");
+            shadow.ShadowRenderTarget = shadowTarget;
+            shadow.SpriteBatch = spriteBatch;
             componentManager.AddComponent(shadowMapEntity, shadow);
 
            

@@ -15,10 +15,10 @@ namespace ECS_Engine.Engine.Systems
 {
     public class ModelRenderSystem : IRenderSystem
     {
-        public static SpriteBatch spriteBatch;
         SortedList<float, Entity> transparentEntities = new SortedList<float, Entity>();
         public void Render(GameTime gameTime, GraphicsDeviceManager graphicsDevice, ComponentManager componentManager)
         {
+
             Dictionary<Entity, IComponent> cameraValuePairs = componentManager.GetComponents<CameraComponent>();
             CameraComponent cameraC = (CameraComponent)cameraValuePairs.First().Value;
 
@@ -79,6 +79,7 @@ namespace ECS_Engine.Engine.Systems
                 }
             }
             DrawModelsWithEffects(graphicsDevice, componentManager);
+            DrawShadowmapModels(graphicsDevice.GraphicsDevice, componentManager);
         }
 
         public void DrawModelsWithEffects(GraphicsDeviceManager graphicsDevice, ComponentManager componentManager)
@@ -163,7 +164,6 @@ namespace ECS_Engine.Engine.Systems
             }
             DrawTransparentModels(graphicsDevice, componentManager, transparentEntities);
             transparentEntities.Clear();
-            DrawShadowmapModels(graphicsDevice.GraphicsDevice, componentManager);
         }
 
         public void DrawTransparentModels(GraphicsDeviceManager graphicsDevice, ComponentManager componentManager, SortedList<float, Entity> transparentEntities)
@@ -310,19 +310,24 @@ namespace ECS_Engine.Engine.Systems
             Dictionary<Entity, IComponent> camEntities = componentManager.GetComponents<CameraComponent>();
             CameraComponent camera = (CameraComponent)camEntities.First().Value;
 
-            Dictionary<Entity, IComponent> shadowComponent = componentManager.GetComponents<ShadowComponent>();
-            ShadowComponent shadow = (ShadowComponent)shadowComponent.First().Value;
+            Dictionary<Entity, IComponent> shadowComponents = componentManager.GetComponents<ShadowComponent>();
 
-            shadow.LightViewProjection = CreateLightViewProjectionMatrix(shadow, camera);
+            foreach (KeyValuePair<Entity, IComponent> shadows in shadowComponents)
+            {
+                //Detta skall endast göras en gång och inte för varje skugga. 
+                //Det handlar enbart om att se hur kamerans position är kontra ljussättningen för att veta var skuggor skall ritas ut.
+                //Det enda som skall köras för varje model är DrawShadowModel
+                //Det vi vill göra är att där sätta en loop runt DrawShadowModel och där rita ut varje model som har en skugga.
+                //Övriga funktioner och variabler beror inte på shadowcomponenten och bör därför endast köras en gång per gametick.
+                shadow.LightViewProjection = CreateLightViewProjectionMatrix(shadow, camera);
 
-            graphicsDevice.BlendState = BlendState.Opaque;
-            graphicsDevice.DepthStencilState = DepthStencilState.Default;
-
-            CreateShadowMap(componentManager, shadow, graphicsDevice);
-
-            spriteBatch.Begin(0, BlendState.Opaque, SamplerState.PointClamp, null, null);
-            spriteBatch.Draw(shadow.ShadowRenderTarget, new Rectangle(0, 0, 128, 128), Color.White);
-            spriteBatch.End();
+                graphicsDevice.BlendState = BlendState.Opaque;
+                graphicsDevice.DepthStencilState = DepthStencilState.Default;
+                CreateShadowMap(componentManager, shadow, graphicsDevice);
+            }
+            shadow.SpriteBatch.Begin(0, BlendState.Opaque, SamplerState.PointClamp, null, null);
+            shadow.SpriteBatch.Draw(shadow.ShadowRenderTarget, new Rectangle(0, 0, 128, 128), Color.White);
+            shadow.SpriteBatch.End();
 
             graphicsDevice.Textures[0] = null;
             graphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
@@ -332,8 +337,10 @@ namespace ECS_Engine.Engine.Systems
             shadow.LightRotation = Matrix.CreateLookAt(Vector3.Zero,
                                                        -shadow.LightDirection,
                                                        Vector3.Up);
-
-            BoundingFrustum camFrustrum = new BoundingFrustum(camera.Projection);
+            //Detta måste rättas till. Camera Frustum beräkningen känns inte korrekt.
+            //Måste se över variablerna i cameran och bestämma var uträkningen skall ske.
+            BoundingFrustum camFrustrum = new BoundingFrustum(Matrix.Identity);
+            camFrustrum.Matrix = camera.View * camera.Projection;
             shadow.FrustumCorners = camFrustrum.GetCorners();
 
             for (int i = 0; i < shadow.FrustumCorners.Length; i++)
@@ -370,9 +377,7 @@ namespace ECS_Engine.Engine.Systems
 
             graphicsDevice.SetRenderTarget(shadow.ShadowRenderTarget);
             graphicsDevice.Clear(Color.White);
-
-
-
+            
 
             foreach (ModelComponent model in models.Values)
             {
@@ -405,6 +410,8 @@ namespace ECS_Engine.Engine.Systems
                     effect.Parameters["World"].SetValue(Matrix.Identity);
                     effect.Parameters["View"].SetValue(camera.View);
                     effect.Parameters["Projection"].SetValue(camera.Projection);
+                    //Effekterna sätts aldrig korrekt här
+                    //SE ÖVER
                     effect.Parameters["LightDirection"].SetValue(shadow.LightDirection);
                     effect.Parameters["LightViewProj"].SetValue(shadow.LightViewProjection);
 
