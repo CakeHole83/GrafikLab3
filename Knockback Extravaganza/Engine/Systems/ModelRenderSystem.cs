@@ -79,7 +79,7 @@ namespace ECS_Engine.Engine.Systems
                 }
             }
             DrawModelsWithEffects(graphicsDevice, componentManager);
-            DrawShadowmapModels(graphicsDevice.GraphicsDevice, componentManager);
+
         }
 
         public void DrawModelsWithEffects(GraphicsDeviceManager graphicsDevice, ComponentManager componentManager)
@@ -113,6 +113,7 @@ namespace ECS_Engine.Engine.Systems
                                 {
                                     foreach (var effect in effectC.Effects)
                                     {
+
                                         part.Effect = effect.Key;
                                         part.Effect.Parameters["World"].SetValue(meshTransform.GetTranform(mesh.Name).World * transforms[mesh.ParentBone.Index] * transform.World);
                                         part.Effect.Parameters["View"].SetValue(camera.View);
@@ -152,9 +153,8 @@ namespace ECS_Engine.Engine.Systems
                                                     break;
                                             }
                                         }
-
+                                        pass.Apply();
                                     }
-                                    pass.Apply();
                                 }
                                 mesh.Draw();
                             }
@@ -195,7 +195,6 @@ namespace ECS_Engine.Engine.Systems
                                     foreach (var effect in effectC.Effects)
                                     {
                                         part.Effect = effect.Key;
-
                                         part.Effect.Parameters["World"].SetValue(
                                               meshTransform.GetTranform(mesh.Name).World * transforms[mesh.ParentBone.Index] * transform.World);
                                         part.Effect.Parameters["View"].SetValue(camera.View);
@@ -250,6 +249,7 @@ namespace ECS_Engine.Engine.Systems
                     }
                 }
             }
+            DrawShadowmapModels(graphicsDevice.GraphicsDevice, componentManager);
         }
 
         private void CheckForTexture(ModelComponent model, BasicEffect effect)
@@ -314,6 +314,7 @@ namespace ECS_Engine.Engine.Systems
 
             foreach (KeyValuePair<Entity, IComponent> shadows in shadowComponents)
             {
+                ShadowComponent shadow = (ShadowComponent)shadows.Value;
                 //Detta skall endast göras en gång och inte för varje skugga. 
                 //Det handlar enbart om att se hur kamerans position är kontra ljussättningen för att veta var skuggor skall ritas ut.
                 //Det enda som skall köras för varje model är DrawShadowModel
@@ -323,14 +324,17 @@ namespace ECS_Engine.Engine.Systems
 
                 graphicsDevice.BlendState = BlendState.Opaque;
                 graphicsDevice.DepthStencilState = DepthStencilState.Default;
-                CreateShadowMap(componentManager, shadow, graphicsDevice);
-            }
-            shadow.SpriteBatch.Begin(0, BlendState.Opaque, SamplerState.PointClamp, null, null);
-            shadow.SpriteBatch.Draw(shadow.ShadowRenderTarget, new Rectangle(0, 0, 128, 128), Color.White);
-            shadow.SpriteBatch.End();
 
-            graphicsDevice.Textures[0] = null;
-            graphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
+                CreateShadowMap(componentManager, shadow, graphicsDevice);
+
+                shadow.SpriteBatch.Begin(0, BlendState.Opaque, SamplerState.PointClamp, null, null);
+                shadow.SpriteBatch.Draw(shadow.ShadowRenderTarget, new Rectangle(0, 0, 128, 128), Color.White);
+                shadow.SpriteBatch.End();
+
+                graphicsDevice.Textures[0] = null;
+                graphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
+            }
+
         }
         public Matrix CreateLightViewProjectionMatrix(ShadowComponent shadow, CameraComponent camera)
         {
@@ -371,31 +375,47 @@ namespace ECS_Engine.Engine.Systems
 
         void CreateShadowMap(ComponentManager componentManager, ShadowComponent shadow, GraphicsDevice graphicsDevice)
         {
-            Dictionary<Entity, IComponent> models = componentManager.GetComponents<ModelComponent>();
+            Dictionary<Entity, IComponent> modelComponents = componentManager.GetComponents<ModelComponent>();
             Dictionary<Entity, IComponent> cam = componentManager.GetComponents<CameraComponent>();
             CameraComponent camera = (CameraComponent)cam.First().Value;
 
-            graphicsDevice.SetRenderTarget(shadow.ShadowRenderTarget);
-            graphicsDevice.Clear(Color.White);
-            
 
-            foreach (ModelComponent model in models.Values)
+            foreach (var modelComponent in modelComponents)
             {
-                if (model.CastShadow)
+                ModelComponent model = (ModelComponent)modelComponent.Value;
+                //Plocka ut entiteterna istället så du kan använda dem för att ta fram transform comp per entity med nyckeln
+                if (model.ShadowsOn)
                 {
-                    DrawShadowModel(model,shadow,camera, true);
+                    shadow.ShadowRenderTarget = new RenderTarget2D(graphicsDevice,
+                                                    2048,
+                                                    2048,
+                                                    false,
+                                                    SurfaceFormat.Single,
+                                                    DepthFormat.Depth24);
+                    graphicsDevice.SetRenderTarget(shadow.ShadowRenderTarget);
+                    graphicsDevice.Clear(Color.White);
+                    DrawShadowModel(componentManager, modelComponent, shadow, camera, true);
                     graphicsDevice.SetRenderTarget(null);
+                    graphicsDevice.Clear(Color.CornflowerBlue);
+                    graphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
                 }
-                graphicsDevice.Clear(Color.CornflowerBlue);
-                graphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
-                DrawShadowModel(model, shadow, camera, false);
+                
+                
+                DrawShadowModel(componentManager, modelComponent, shadow, camera, false);
             }
-            
+
         }
 
-        void DrawShadowModel(ModelComponent model, ShadowComponent shadow,  CameraComponent camera, bool createShadowMap)
+        void DrawShadowModel(ComponentManager componentManager, KeyValuePair<Entity, IComponent> modelComponent, ShadowComponent shadow, CameraComponent camera, bool createShadowMap)
         {
+            //Det är här modellerna påverkas utav effekten. Sätt alltså effekten i en egen komponent som är påslagen hela tiden.
+            //Låt modellerna påverkas här men de har ingenting med värdena att göra.
             string techniqueName = createShadowMap ? "CreateShadowMap" : "DrawWithShadowMap";
+
+            ModelTransformComponent modelTransform = componentManager.GetComponent<ModelTransformComponent>(modelComponent.Key);
+            TransformComponent transformComponent = componentManager.GetComponent<TransformComponent>(modelComponent.Key);
+            ModelComponent model = (ModelComponent)modelComponent.Value;
+            EffectComponent effectComponent = componentManager.GetComponent<EffectComponent>(modelComponent.Key);
 
             Matrix[] transforms = new Matrix[model.Model.Bones.Count];
             model.Model.CopyAbsoluteBoneTransformsTo(transforms);
@@ -403,22 +423,28 @@ namespace ECS_Engine.Engine.Systems
             // Loop over meshs in the model
             foreach (ModelMesh mesh in model.Model.Meshes)
             {
-                // Loop over effects in the mesh
-                foreach (Effect effect in mesh.Effects)
-                {
-                    effect.CurrentTechnique = effect.Techniques[techniqueName];
-                    effect.Parameters["World"].SetValue(Matrix.Identity);
-                    effect.Parameters["View"].SetValue(camera.View);
-                    effect.Parameters["Projection"].SetValue(camera.Projection);
-                    //Effekterna sätts aldrig korrekt här
-                    //SE ÖVER
-                    effect.Parameters["LightDirection"].SetValue(shadow.LightDirection);
-                    effect.Parameters["LightViewProj"].SetValue(shadow.LightViewProjection);
 
-                    if (!createShadowMap)
-                        effect.Parameters["ShadowMap"].SetValue(shadow.ShadowRenderTarget);
-                }
+                    // Loop over effects in the mesh
+                    foreach (var effect in effectComponent.Effects)
+                    {
+                        Effect part = effect.Key;
+                        if (part.Name == "Effects/ShadowMapping")
+                        {
+                            part.CurrentTechnique = part.Techniques[techniqueName];
 
+                            part.Parameters["World"].SetValue(
+                                modelTransform.GetTranform(mesh.Name).World * transforms[mesh.ParentBone.Index] * transformComponent.World);
+                            part.Parameters["View"].SetValue(camera.View);
+                            part.Parameters["Projection"].SetValue(camera.Projection);
+                            
+                            part.Parameters["LightDirection"].SetValue(shadow.LightDirection);
+                            part.Parameters["LightViewProj"].SetValue(shadow.LightViewProjection);
+
+                            if (!createShadowMap)
+                                part.Parameters["ShadowMap"].SetValue(shadow.ShadowRenderTarget);
+                        }
+                    }
+                
                 mesh.Draw();
             }
         }

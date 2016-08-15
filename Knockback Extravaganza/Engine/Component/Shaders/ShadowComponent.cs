@@ -16,7 +16,7 @@ namespace ECS_Engine.Engine.Component.Shaders
         public Matrix LightRotation { get; set; }
         public Vector3[] FrustumCorners { get; set; }
         public RenderTarget2D ShadowRenderTarget { get; set; }
-        public Effect ShadowEffect { get; set; }
         public SpriteBatch SpriteBatch { get; set; }
+        public bool CastShadow { get; set; } = true;
     }
 }

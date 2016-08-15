@@ -86,36 +86,25 @@ DrawWithShadowMap_VSOut DrawWithShadowMap_VertexShader(DrawWithShadowMap_VSIn in
 // if it is in shadow or not
 float4 DrawWithShadowMap_PixelShader(DrawWithShadowMap_VSOut input) : COLOR
 { 
-    // Color of the model
-    float4 diffuseColor = tex2D(TextureSampler, input.TexCoord);
-    // Intensity based on the direction of the light
+    float4 diffuseColor = tex2D(TextureSampler, input.TexCoord); 
     float diffuseIntensity = saturate(dot(LightDirection, input.Normal));
-    // Final diffuse color with ambient color added
     float4 diffuse = diffuseIntensity * diffuseColor + AmbientColor;
-    
-    // Find the position of this pixel in light space
     float4 lightingPosition = mul(input.WorldPos, LightViewProj);
     
-    // Find the position in the shadow map for this pixel
     float2 ShadowTexCoord = 0.5 * lightingPosition.xy / 
                             lightingPosition.w + float2( 0.5, 0.5 );
     ShadowTexCoord.y = 1.0f - ShadowTexCoord.y;
 
-    // Get the current depth stored in the shadow map
-    float shadowdepth = tex2D(ShadowMapSampler, ShadowTexCoord).r;    
+	float shadowdepth = tex2D(ShadowMapSampler, ShadowTexCoord).r;    
     
-    // Calculate the current pixel depth
-    // The bias is used to prevent folating point errors that occur when
-    // the pixel of the occluder is being drawn
     float ourdepth = (lightingPosition.z / lightingPosition.w) - DepthBias;
-    
-    // Check to see if this pixel is in front or behind the value in the shadow map
-    if (shadowdepth < ourdepth)
+
+	if (shadowdepth < ourdepth)
     {
         // Shadow the pixel by lowering the intensity
-        diffuse *= float4(0.5,0.5,0.5,0);
+    diffuse *= float4(0.5,0.5,0.5,0);
     };
-    
+
     return diffuse;
 }
 

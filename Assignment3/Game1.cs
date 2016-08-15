@@ -108,6 +108,25 @@ namespace Assignment3
             componentManager.AddComponent(cameraEntity, cameraC);
             componentManager.AddComponent(cameraEntity, transformCompCamera);
 
+            //ShadowMapping
+            RenderTarget2D shadowTarget = new RenderTarget2D(graphics.GraphicsDevice,
+                                                    2048,
+                                                    2048,
+                                                    false,
+                                                    SurfaceFormat.Single,
+                                                    DepthFormat.Depth24);
+
+            var shadowMapEntity = new Entity();
+            shadowMapEntity.Tag = "shadowmap";
+
+            ShadowComponent shadow = new ShadowComponent();
+
+            shadow.ShadowRenderTarget = shadowTarget;
+            shadow.SpriteBatch = spriteBatch;
+
+            componentManager.AddComponent(shadowMapEntity, shadow);
+
+
 
             //Helicopter Texture shading
             var sphereEntity = new Entity();
@@ -121,6 +140,7 @@ namespace Assignment3
                 Effects = new Dictionary<Effect, List<string>>(),
             };
             sphereEffectC.Effects.Add(Content.Load<Effect>("Effects/TextureShader"), new List<string> { "WorldInverseTranspose", "ModelTexture", "ViewVector", "CameraPosition" });
+            sphereEffectC.Effects.Add(Content.Load<Effect>("Effects/ShadowMapping"), new List<string> { "LightDirection", "LightViewProj" });
 
             var sphereModelTransC = new ModelTransformComponent(sphereModelC.Model);
 
@@ -134,7 +154,7 @@ namespace Assignment3
             componentManager.AddComponent(sphereEntity, sphereModelC);
             componentManager.AddComponent(sphereEntity, sphereModelTransC);
             componentManager.AddComponent(sphereEntity, sphereEffectC);
-
+            
             //Zeppelin Diffuse shading
             var zeppE = new Entity();
             var zeppModelC = new ModelComponent
@@ -147,6 +167,7 @@ namespace Assignment3
             };
 
             zeppEffectC.Effects.Add(Content.Load<Effect>("Effects/Diffuse"), new List<string> { "AmbientColor", "AmbientIntensity", "WorldInverseTranspose" });
+            zeppEffectC.Effects.Add(Content.Load<Effect>("Effects/ShadowMapping"), new List<string> { "LightDirection", "LightViewProj" });
             ModelTransformComponent modeltransC = new ModelTransformComponent(zeppModelC.Model);
 
             var zeppTransformC = new TransformComponent()
@@ -172,7 +193,7 @@ namespace Assignment3
                 Effects = new Dictionary<Effect, List<string>>(),
             };
             nordEffectC.Effects.Add(Content.Load<Effect>("Effects/Specular"), new List<string> { "AmbientColor", "AmbientIntensity", "WorldInverseTranspose", "ViewVector", "CameraPosition" });
-
+            nordEffectC.Effects.Add(Content.Load<Effect>("Effects/ShadowMapping"), new List<string> { "LightDirection", "LightViewProj" });
             var nordmodelTransC = new ModelTransformComponent(nordModelC.Model);
 
             var nordTransformC = new TransformComponent()
@@ -200,7 +221,7 @@ namespace Assignment3
                 Effects = new Dictionary<Effect, List<string>>(),
             };
             hangarEffectC.Effects.Add(Content.Load<Effect>("Effects/Transparency"), new List<string> { "AmbientColor", "AmbientIntensity", "WorldInverseTranspose", "ViewVector", "ModelTexture", "Transparency" });
-
+            hangarEffectC.Effects.Add(Content.Load<Effect>("Effects/ShadowMapping"), new List<string> { "LightDirection", "LightViewProj" });
             var hangarModelTransC = new ModelTransformComponent(hangarModelC.Model);
 
             var hangarTransformC = new TransformComponent()
@@ -229,7 +250,7 @@ namespace Assignment3
                 Effects = new Dictionary<Effect, List<string>>(),
             };
             old1EffectC.Effects.Add(Content.Load<Effect>("Effects/Transparency"), new List<string> { "AmbientColor", "AmbientIntensity", "WorldInverseTranspose", "ViewVector", "ModelTexture", "Transparency" });
-
+            old1EffectC.Effects.Add(Content.Load<Effect>("Effects/ShadowMapping"), new List<string> { "LightDirection", "LightViewProj" });
 
             var old1TransformC = new TransformComponent()
             {
@@ -248,7 +269,6 @@ namespace Assignment3
             var old2ModelC = new ModelComponent
             {
                 Model = Content.Load<Model>("Chopper"),
-
             };
 
             var old2EffectC = new EffectComponent
@@ -257,6 +277,7 @@ namespace Assignment3
                 Normalmap = Content.Load<Texture2D>("normalmap/HelicopterNormalMap")
             };
             old2EffectC.Effects.Add(Content.Load<Effect>("Effects/NormalMap"), new List<string> { "AmbientColor", "AmbientIntensity", "WorldInverseTranspose", "ViewVector", "ModelTexture", "NormalMap", "CameraPosition" });
+            old2EffectC.Effects.Add(Content.Load<Effect>("Effects/ShadowMapping"), new List<string> { "LightDirection", "LightViewProj"});
 
             var old2ModelTransC = new ModelTransformComponent(old2ModelC.Model);
 
@@ -282,27 +303,8 @@ namespace Assignment3
                 SkyboxTexture = Content.Load<TextureCube>("Skyboxes/Islands"),
                 SkyboxEffect = Content.Load<Effect>("Effects/Skybox")
             };
-
+            
             componentManager.AddComponent(skyboxE, skyboxC);
-
-            //ShadowMapping
-            RenderTarget2D shadowTarget = new RenderTarget2D(graphics.GraphicsDevice,
-                                                    2048,
-                                                    2048,
-                                                    false,
-                                                    SurfaceFormat.Single,
-                                                    DepthFormat.Depth24);
-
-            //ShadowMapping cube
-            var shadowMapEntity = new Entity();
-            shadowMapEntity.Tag = "shadowmap";
-
-            ShadowComponent shadow = new ShadowComponent();
-            shadow.ShadowEffect = Content.Load<Effect>("Effects/ShadowMapping");
-            shadow.ShadowRenderTarget = shadowTarget;
-            shadow.SpriteBatch = spriteBatch;
-            componentManager.AddComponent(shadowMapEntity, shadow);
-
            
         }
 
