@@ -11,7 +11,7 @@ namespace ECS_Engine.Engine.Component.Shaders
 {
     public class ShadowComponent : IComponent
     {
-        public Vector3 LightDirection { get; set; } = new Vector3(-0.3333333f, 0.6666667f, 0.6666667f);
+        public Vector3 LightDirection = new Vector3(-0.3333333f, 0.6666667f, 0.6666667f);
         public Matrix LightViewProjection { get; set; }
         public Matrix LightRotation { get; set; }
         public Vector3[] FrustumCorners { get; set; }

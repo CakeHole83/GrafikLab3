@@ -126,7 +126,7 @@ namespace Assignment3
 
             componentManager.AddComponent(shadowMapEntity, shadow);
 
-
+            /*
 
             //Helicopter Texture shading
             var sphereEntity = new Entity();
@@ -140,7 +140,7 @@ namespace Assignment3
                 Effects = new Dictionary<Effect, List<string>>(),
             };
             sphereEffectC.Effects.Add(Content.Load<Effect>("Effects/TextureShader"), new List<string> { "WorldInverseTranspose", "ModelTexture", "ViewVector", "CameraPosition" });
-            sphereEffectC.Effects.Add(Content.Load<Effect>("Effects/ShadowMapping"), new List<string> { "LightDirection", "LightViewProj" });
+
 
             var sphereModelTransC = new ModelTransformComponent(sphereModelC.Model);
 
@@ -167,7 +167,7 @@ namespace Assignment3
             };
 
             zeppEffectC.Effects.Add(Content.Load<Effect>("Effects/Diffuse"), new List<string> { "AmbientColor", "AmbientIntensity", "WorldInverseTranspose" });
-            zeppEffectC.Effects.Add(Content.Load<Effect>("Effects/ShadowMapping"), new List<string> { "LightDirection", "LightViewProj" });
+
             ModelTransformComponent modeltransC = new ModelTransformComponent(zeppModelC.Model);
 
             var zeppTransformC = new TransformComponent()
@@ -193,7 +193,7 @@ namespace Assignment3
                 Effects = new Dictionary<Effect, List<string>>(),
             };
             nordEffectC.Effects.Add(Content.Load<Effect>("Effects/Specular"), new List<string> { "AmbientColor", "AmbientIntensity", "WorldInverseTranspose", "ViewVector", "CameraPosition" });
-            nordEffectC.Effects.Add(Content.Load<Effect>("Effects/ShadowMapping"), new List<string> { "LightDirection", "LightViewProj" });
+
             var nordmodelTransC = new ModelTransformComponent(nordModelC.Model);
 
             var nordTransformC = new TransformComponent()
@@ -221,7 +221,7 @@ namespace Assignment3
                 Effects = new Dictionary<Effect, List<string>>(),
             };
             hangarEffectC.Effects.Add(Content.Load<Effect>("Effects/Transparency"), new List<string> { "AmbientColor", "AmbientIntensity", "WorldInverseTranspose", "ViewVector", "ModelTexture", "Transparency" });
-            hangarEffectC.Effects.Add(Content.Load<Effect>("Effects/ShadowMapping"), new List<string> { "LightDirection", "LightViewProj" });
+
             var hangarModelTransC = new ModelTransformComponent(hangarModelC.Model);
 
             var hangarTransformC = new TransformComponent()
@@ -250,7 +250,7 @@ namespace Assignment3
                 Effects = new Dictionary<Effect, List<string>>(),
             };
             old1EffectC.Effects.Add(Content.Load<Effect>("Effects/Transparency"), new List<string> { "AmbientColor", "AmbientIntensity", "WorldInverseTranspose", "ViewVector", "ModelTexture", "Transparency" });
-            old1EffectC.Effects.Add(Content.Load<Effect>("Effects/ShadowMapping"), new List<string> { "LightDirection", "LightViewProj" });
+
 
             var old1TransformC = new TransformComponent()
             {
@@ -277,7 +277,7 @@ namespace Assignment3
                 Normalmap = Content.Load<Texture2D>("normalmap/HelicopterNormalMap")
             };
             old2EffectC.Effects.Add(Content.Load<Effect>("Effects/NormalMap"), new List<string> { "AmbientColor", "AmbientIntensity", "WorldInverseTranspose", "ViewVector", "ModelTexture", "NormalMap", "CameraPosition" });
-            old2EffectC.Effects.Add(Content.Load<Effect>("Effects/ShadowMapping"), new List<string> { "LightDirection", "LightViewProj"});
+
 
             var old2ModelTransC = new ModelTransformComponent(old2ModelC.Model);
 
@@ -292,6 +292,33 @@ namespace Assignment3
             componentManager.AddComponent(old2Entity, old2ModelC);
             componentManager.AddComponent(old2Entity, old2TransformC);
             componentManager.AddComponent(old2Entity, old2EffectC);
+            */
+            var eyeEntity = new Entity();
+            var eyeModelC = new ModelComponent
+            {
+                Model = Content.Load<Model>("eye_set_SMOOTH"),
+            };
+
+            var eyeEffect = new EffectComponent
+            {
+                Effects = new Dictionary<Effect, List<string>>(),
+            };
+            eyeEffect.Effects.Add(Content.Load<Effect>("Effects/ShadowMapping"), new List<string> { "LightDirection", "LightViewProj" });
+
+
+            var eyeModelTrans = new ModelTransformComponent(eyeModelC.Model);
+
+            var eyeTransformC = new TransformComponent()
+            {
+                Position = new Vector3(-500, 200, -1200),
+                Rotation = new Vector3(0, 0, 0),
+                Scale = new Vector3(50)
+            };
+
+            componentManager.AddComponent(eyeEntity,eyeModelTrans);
+            componentManager.AddComponent(eyeEntity, eyeModelC);
+            componentManager.AddComponent(eyeEntity, eyeTransformC);
+            componentManager.AddComponent(eyeEntity, eyeEffect);
 
             //Skybox
             var skyboxE = new Entity();
