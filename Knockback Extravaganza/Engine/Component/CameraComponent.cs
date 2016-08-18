@@ -25,6 +25,7 @@ namespace ECS_Engine.Engine.Component {
         public float NearPlaneDistace { get; set; }
         public float FarPlaneDistace { get; set; }
         public Vector3 ViewVector { get; set; }
+        public BoundingFrustum CameraFrustum { get; set; } = new BoundingFrustum(Matrix.Identity);
 
     }
 }

@@ -28,6 +28,7 @@ namespace ECS_Engine.Engine.Systems
                         camera.ViewVector = Vector3.Transform(camera.Target - transform.Position, Matrix.CreateRotationY(0));
                         camera.ViewVector.Normalize();
                         camera.View = Matrix.CreateLookAt(transform.Position, camera.Target, camera.Up);
+                        camera.CameraFrustum.Matrix = camera.View * camera.Projection;
                     }
 
                 }

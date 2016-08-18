@@ -13,6 +13,7 @@ namespace ECS_Engine.Engine.Component {
         public Matrix[] Meshes { get; set; }
         public Texture2D Texture { get; set; }
         public bool HasTransparentMesh { get; set; } = false;
+        public bool CastShadowOn { get; set; } = true;
         public bool ShadowsOn { get; set; } = true;
         public ModelComponent() {
             Texture = null;
