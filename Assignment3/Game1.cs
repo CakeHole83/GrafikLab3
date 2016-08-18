@@ -263,7 +263,7 @@ namespace Assignment3
             componentManager.AddComponent(old1Entity, old1ModelC);
             componentManager.AddComponent(old1Entity, old1TransformC);
             componentManager.AddComponent(old1Entity, old1EffectC);
-
+            */
             //Bumpmap helicopter
             var old2Entity = new Entity();
             var old2ModelC = new ModelComponent
@@ -292,7 +292,7 @@ namespace Assignment3
             componentManager.AddComponent(old2Entity, old2ModelC);
             componentManager.AddComponent(old2Entity, old2TransformC);
             componentManager.AddComponent(old2Entity, old2EffectC);
-            */
+
             var eyeEntity = new Entity();
             var eyeModelC = new ModelComponent
             {
@@ -304,7 +304,7 @@ namespace Assignment3
                 Effects = new Dictionary<Effect, List<string>>(),
             };
             eyeEffect.Effects.Add(Content.Load<Effect>("Effects/ShadowMapping"), new List<string> { "LightDirection", "LightViewProj" });
-
+            
 
             var eyeModelTrans = new ModelTransformComponent(eyeModelC.Model);
 
