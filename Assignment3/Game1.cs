@@ -53,7 +53,7 @@ namespace Assignment3
 
             TransformComponent tranformCompTarget = new TransformComponent
             {
-                Position = new Vector3(0, 0, 0),
+                Position = new Vector3(10, 10, 10),
                 Rotation = new Vector3(0, 0, 0)
             };
 
@@ -77,7 +77,7 @@ namespace Assignment3
             componentManager.AddComponent(targetEntity, movementCompTarget);
             componentManager.AddComponent(targetEntity, keyboardCompTarget);
             componentManager.AddComponent(targetEntity, tranformCompTarget);
-            
+
             //Camera
 
             Entity cameraEntity = new Entity();
@@ -92,7 +92,7 @@ namespace Assignment3
                 Up = Vector3.Up,
 
             };
-         
+
             ChaseCameraComponent chaseCameraComp = new ChaseCameraComponent
             {
                 Target = targetEntity,
@@ -108,26 +108,6 @@ namespace Assignment3
             componentManager.AddComponent(cameraEntity, cameraC);
             componentManager.AddComponent(cameraEntity, transformCompCamera);
 
-            //ShadowMapping
-            RenderTarget2D shadowTarget = new RenderTarget2D(graphics.GraphicsDevice,
-                                                    2048,
-                                                    2048,
-                                                    false,
-                                                    SurfaceFormat.Single,
-                                                    DepthFormat.Depth24);
-
-            var shadowMapEntity = new Entity();
-            shadowMapEntity.Tag = "shadowmap";
-
-            ShadowComponent shadow = new ShadowComponent();
-
-            shadow.ShadowRenderTarget = shadowTarget;
-            shadow.SpriteBatch = spriteBatch;
-
-            componentManager.AddComponent(shadowMapEntity, shadow);
-
-            /*
-
             //Helicopter Texture shading
             var sphereEntity = new Entity();
             var sphereModelC = new ModelComponent
@@ -139,8 +119,7 @@ namespace Assignment3
             {
                 Effects = new Dictionary<Effect, List<string>>(),
             };
-            sphereEffectC.Effects.Add(Content.Load<Effect>("Effects/TextureShader"), new List<string> { "WorldInverseTranspose", "ModelTexture", "ViewVector", "CameraPosition" });
-
+            sphereEffectC.Effects.Add(Content.Load<Effect>("Effects/Diffuse"), new List<string> { "AmbientColor", "AmbientIntensity", "WorldInverseTranspose" });
 
             var sphereModelTransC = new ModelTransformComponent(sphereModelC.Model);
 
@@ -150,16 +129,48 @@ namespace Assignment3
                 Rotation = new Vector3(0, 0, 0),
                 Scale = new Vector3(50)
             };
+            //ShadowMapping
+            //var shadowMapEntity = new Entity();
+            //shadowMapEntity.Tag = "shadowmap";
+
+            RenderTarget2D shadowTarget = new RenderTarget2D(graphics.GraphicsDevice, 2048, 2048, false, SurfaceFormat.Single, DepthFormat.Depth24);
+
+            ShadowComponent shadow = new ShadowComponent();
+
+            shadow.ShadowRenderTarget = shadowTarget;
+            shadow.SpriteBatch = spriteBatch;
+
+            componentManager.AddComponent(sphereEntity, shadow);
             componentManager.AddComponent(sphereEntity, sphereTransformC);
             componentManager.AddComponent(sphereEntity, sphereModelC);
             componentManager.AddComponent(sphereEntity, sphereModelTransC);
             componentManager.AddComponent(sphereEntity, sphereEffectC);
-            
-            //Zeppelin Diffuse shading
+
+            var chopperEntity = new Entity();
+            var chopperModelC = new ModelComponent
+            {
+                Model = Content.Load<Model>("platform")
+            };
+
+
+            var chopperModelTransC = new ModelTransformComponent(chopperModelC.Model);
+
+            var chopperTransformC = new TransformComponent()
+            {
+                Position = new Vector3(0, 0, 0),
+                Rotation = new Vector3(0, 0, 0),
+                Scale = new Vector3(10)
+            };
+            componentManager.AddComponent(chopperEntity, chopperTransformC);
+            componentManager.AddComponent(chopperEntity, chopperModelC);
+            componentManager.AddComponent(chopperEntity, chopperModelTransC);
+
+            // Diffuse shading
             var zeppE = new Entity();
             var zeppModelC = new ModelComponent
             {
                 Model = Content.Load<Model>("Zeppelin_NT"),
+                Texture = Content.Load<Texture2D>("HelicopterTextureMap"),
             };
             var zeppEffectC = new EffectComponent
             {
@@ -187,6 +198,7 @@ namespace Assignment3
             var nordModelC = new ModelComponent
             {
                 Model = Content.Load<Model>("Nordstern"),
+                Texture = Content.Load<Texture2D>("HelicopterTextureMap"),
             };
             var nordEffectC = new EffectComponent
             {
@@ -213,6 +225,7 @@ namespace Assignment3
             var hangarModelC = new ModelComponent
             {
                 Model = Content.Load<Model>("moffett-hangar2"),
+                Texture = Content.Load<Texture2D>("HelicopterTextureMap"),
                 HasTransparentMesh = true
             };
 
@@ -236,10 +249,13 @@ namespace Assignment3
             componentManager.AddComponent(hangarE, hangarModelTransC);
             componentManager.AddComponent(hangarE, hangarEffectC);
 
+
+
             var old1Entity = new Entity();
             var old1ModelC = new ModelComponent
             {
                 Model = Content.Load<Model>("moffett-old-building-a"),
+                Texture = Content.Load<Texture2D>("HelicopterTextureMap"),
                 HasTransparentMesh = true
             };
 
@@ -269,12 +285,13 @@ namespace Assignment3
             var old2ModelC = new ModelComponent
             {
                 Model = Content.Load<Model>("Chopper"),
+                Texture = Content.Load<Texture2D>("HelicopterTextureMap"),
             };
 
             var old2EffectC = new EffectComponent
             {
                 Effects = new Dictionary<Effect, List<string>>(),
-                Normalmap = Content.Load<Texture2D>("normalmap/HelicopterNormalMap")
+                Normalmap = Content.Load<Texture2D>("normalmap/HelicopterNormalMap"),
             };
             old2EffectC.Effects.Add(Content.Load<Effect>("Effects/NormalMap"), new List<string> { "AmbientColor", "AmbientIntensity", "WorldInverseTranspose", "ViewVector", "ModelTexture", "NormalMap", "CameraPosition" });
 
@@ -292,11 +309,12 @@ namespace Assignment3
             componentManager.AddComponent(old2Entity, old2ModelC);
             componentManager.AddComponent(old2Entity, old2TransformC);
             componentManager.AddComponent(old2Entity, old2EffectC);
-            */
+
             var eyeEntity = new Entity();
             var eyeModelC = new ModelComponent
             {
-                Model = Content.Load<Model>("eye_set_SMOOTH"),
+                Model = Content.Load<Model>("chopper"),
+                Texture = Content.Load<Texture2D>("HelicopterTextureMap"),
             };
 
             var eyeEffect = new EffectComponent
@@ -310,12 +328,12 @@ namespace Assignment3
 
             var eyeTransformC = new TransformComponent()
             {
-                Position = new Vector3(-500, 200, -1200),
+                Position = new Vector3(150, 150, 150),
                 Rotation = new Vector3(0, 0, 0),
                 Scale = new Vector3(50)
             };
 
-            componentManager.AddComponent(eyeEntity,eyeModelTrans);
+            componentManager.AddComponent(eyeEntity, eyeModelTrans);
             componentManager.AddComponent(eyeEntity, eyeModelC);
             componentManager.AddComponent(eyeEntity, eyeTransformC);
             componentManager.AddComponent(eyeEntity, eyeEffect);
@@ -330,9 +348,9 @@ namespace Assignment3
                 SkyboxTexture = Content.Load<TextureCube>("Skyboxes/Islands"),
                 SkyboxEffect = Content.Load<Effect>("Effects/Skybox")
             };
-            
+
             componentManager.AddComponent(skyboxE, skyboxC);
-           
+
         }
 
         public void InitializeSystems()
