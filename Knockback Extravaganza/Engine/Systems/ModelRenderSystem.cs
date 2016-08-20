@@ -121,6 +121,7 @@ namespace ECS_Engine.Engine.Systems
                                     {
                                         foreach (var effect in effectC.Effects)
                                         {
+                                            //KOMMENTAR FÖR ATT PUSHA IGEN
                                             //LÖS SÅ ATT DEN INTE GÅR IGENOM SHADOW EFFEKT. Mesh.draw() kommer att cpa för att man har modeller med flera effekter där shadow effekten inte är satt än.
                                             part.Effect = effect.Key;
                                             if (part.Effect.Name != "Effects/ShadowMapping")
